@@ -1,0 +1,32 @@
+language: cpp
+matrix:
+  include:
+    - os: linux
+      dist: xenial
+      addons:
+        apt:
+          sources:
+            - sourceline: 'ppa:mhier/libboost-latest'
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-8
+            - libboost1.67
+            - libboost1.67-dev
+      env:
+        - MATRIX_EVAL="CC=gcc-8 && CXX=g++-8"
+
+before_install:
+  - eval "${MATRIX_EVAL}"
+
+script:
+  - ./autogen.sh
+  - ./configure --with-boost-libdir=/usr/lib
+  - make dist
+  - mkdir dist
+  - tar -xvzf trustedvote-*.tar.gz -C dist --strip-components=1
+  - rm -f trustedvote-*.tar.gz
+  - pushd "dist"
+  - ./configure --with-boost-libdir=/usr/lib
+  - make
+  - make check
+  - popd
